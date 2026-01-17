@@ -15,16 +15,36 @@ const MesCours = () => {
       try {
         let response
         if (isEtudiant()) {
-          // Récupérer les cours via les inscriptions de l'étudiant
+          // Récupérer les cours via les inscriptions ET via les groupes
           response = await api.get('/api/profile')
-          // Les cours de l'étudiant seront dans son profil ou via inscriptions
-          if (response.data.inscriptions) {
-            setCours(response.data.inscriptions.map(i => ({
+          let allCours = []
+          
+          // Cours via inscriptions directes
+          if (response.data.inscriptions && response.data.inscriptions.length > 0) {
+            const coursInscrits = response.data.inscriptions.map(i => ({
               ...i.cours,
               dateInscription: i.dateInscription,
-              statut: i.statut
-            })))
+              statut: i.statut,
+              source: 'inscription'
+            }))
+            allCours = [...allCours, ...coursInscrits]
           }
+          
+          // Cours via les groupes de l'étudiant
+          if (response.data.coursViaGroupes && response.data.coursViaGroupes.length > 0) {
+            const coursGroupes = response.data.coursViaGroupes.map(c => ({
+              id: c.id,
+              titre: c.titre,
+              description: c.description,
+              duree: c.duree,
+              formateur: c.formateur,
+              groupe: c.groupe,
+              source: 'groupe'
+            }))
+            allCours = [...allCours, ...coursGroupes]
+          }
+          
+          setCours(allCours)
         } else if (isFormateur()) {
           // Récupérer les cours du formateur
           response = await api.get('/api/profile')
@@ -75,8 +95,8 @@ const MesCours = () => {
                   <th>Titre</th>
                   <th>Description</th>
                   <th>Durée</th>
-                  {isEtudiant() && <th>Date inscription</th>}
-                  {isEtudiant() && <th>Statut</th>}
+                  {isEtudiant() && <th>Source</th>}
+                  {isEtudiant() && <th>Statut / Groupe</th>}
                 </tr>
               </thead>
               <tbody>
@@ -85,12 +105,22 @@ const MesCours = () => {
                     <td><strong>{c.titre}</strong></td>
                     <td>{c.description}</td>
                     <td>{c.duree} heures</td>
-                    {isEtudiant() && <td>{c.dateInscription}</td>}
                     {isEtudiant() && (
                       <td>
-                        <Badge bg={c.statut === 'CONFIRMEE' ? 'success' : 'warning'}>
-                          {c.statut}
+                        <Badge bg={c.source === 'inscription' ? 'primary' : 'info'}>
+                          {c.source === 'inscription' ? 'Inscription' : 'Groupe'}
                         </Badge>
+                      </td>
+                    )}
+                    {isEtudiant() && (
+                      <td>
+                        {c.source === 'inscription' ? (
+                          <Badge bg={c.statut === 'CONFIRMEE' ? 'success' : 'warning'}>
+                            {c.statut}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted">{c.groupe}</span>
+                        )}
                       </td>
                     )}
                   </tr>

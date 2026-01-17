@@ -9,7 +9,11 @@ const Register = () => {
     username: '',
     password: '',
     confirmPassword: '',
-    email: ''
+    email: '',
+    userType: '',
+    nom: '',
+    prenom: '',
+    telephone: ''
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -39,6 +43,12 @@ const Register = () => {
       return
     }
 
+    // Validate user type
+    if (!formData.userType) {
+      setError('Veuillez sélectionner votre type de compte')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -46,7 +56,11 @@ const Register = () => {
         username: formData.username,
         password: formData.password,
         confirmPassword: formData.confirmPassword,
-        email: formData.email
+        email: formData.email,
+        userType: formData.userType,
+        nom: formData.nom,
+        prenom: formData.prenom,
+        telephone: formData.telephone || null
       })
       toast.success('Compte créé avec succès! Vous pouvez vous connecter.')
       navigate('/login')
@@ -60,7 +74,7 @@ const Register = () => {
 
   return (
     <div className="login-container">
-      <div className="login-card" style={{ maxWidth: '500px' }}>
+      <div className="login-card" style={{ maxWidth: '550px' }}>
         <div className="login-logo">
           <h2>🎓 Centre Formation</h2>
           <p className="text-muted">Créez votre compte</p>
@@ -69,8 +83,72 @@ const Register = () => {
         {error && <Alert variant="danger">{error}</Alert>}
 
         <Form onSubmit={handleSubmit}>
+          {/* Type d'utilisateur */}
           <Form.Group className="mb-3">
-            <Form.Label>Nom d'utilisateur</Form.Label>
+            <Form.Label>Je suis un(e) <span className="text-danger">*</span></Form.Label>
+            <div className="d-flex gap-3">
+              <Form.Check
+                type="radio"
+                id="etudiant"
+                name="userType"
+                value="ETUDIANT"
+                label="📚 Étudiant"
+                checked={formData.userType === 'ETUDIANT'}
+                onChange={handleChange}
+                className="flex-fill p-3 border rounded"
+                style={{ 
+                  backgroundColor: formData.userType === 'ETUDIANT' ? '#e3f2fd' : 'transparent',
+                  cursor: 'pointer'
+                }}
+              />
+              <Form.Check
+                type="radio"
+                id="formateur"
+                name="userType"
+                value="FORMATEUR"
+                label="👨‍🏫 Formateur"
+                checked={formData.userType === 'FORMATEUR'}
+                onChange={handleChange}
+                className="flex-fill p-3 border rounded"
+                style={{ 
+                  backgroundColor: formData.userType === 'FORMATEUR' ? '#e8f5e9' : 'transparent',
+                  cursor: 'pointer'
+                }}
+              />
+            </div>
+          </Form.Group>
+
+          <Row>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Nom <span className="text-danger">*</span></Form.Label>
+                <Form.Control
+                  type="text"
+                  name="nom"
+                  placeholder="Votre nom"
+                  value={formData.nom}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
+            </Col>
+            <Col md={6}>
+              <Form.Group className="mb-3">
+                <Form.Label>Prénom <span className="text-danger">*</span></Form.Label>
+                <Form.Control
+                  type="text"
+                  name="prenom"
+                  placeholder="Votre prénom"
+                  value={formData.prenom}
+                  onChange={handleChange}
+                  required
+                />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <Form.Group className="mb-3">
+            <Form.Label>Nom d'utilisateur <span className="text-danger">*</span></Form.Label>
             <Form.Control
               type="text"
               name="username"
@@ -83,7 +161,7 @@ const Register = () => {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>Email</Form.Label>
+            <Form.Label>Email <span className="text-danger">*</span></Form.Label>
             <Form.Control
               type="email"
               name="email"
@@ -94,10 +172,24 @@ const Register = () => {
             />
           </Form.Group>
 
+          {/* Téléphone (affiché uniquement pour les formateurs) */}
+          {formData.userType === 'FORMATEUR' && (
+            <Form.Group className="mb-3">
+              <Form.Label>Téléphone</Form.Label>
+              <Form.Control
+                type="tel"
+                name="telephone"
+                placeholder="Votre numéro de téléphone"
+                value={formData.telephone}
+                onChange={handleChange}
+              />
+            </Form.Group>
+          )}
+
           <Row>
             <Col md={6}>
               <Form.Group className="mb-3">
-                <Form.Label>Mot de passe</Form.Label>
+                <Form.Label>Mot de passe <span className="text-danger">*</span></Form.Label>
                 <Form.Control
                   type="password"
                   name="password"
@@ -111,7 +203,7 @@ const Register = () => {
             </Col>
             <Col md={6}>
               <Form.Group className="mb-3">
-                <Form.Label>Confirmer</Form.Label>
+                <Form.Label>Confirmer <span className="text-danger">*</span></Form.Label>
                 <Form.Control
                   type="password"
                   name="confirmPassword"
