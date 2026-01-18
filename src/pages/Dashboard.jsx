@@ -1,162 +1,169 @@
-import { Row, Col, Card, ListGroup, Badge } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import { 
   FaUser, 
   FaBook, 
   FaClipboardList,
   FaGraduationCap,
-  FaCog
+  FaCog,
+  FaArrowRight,
+  FaEnvelope,
+  FaIdBadge,
+  FaInfoCircle,
+  FaChalkboardTeacher
 } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
 
 const Dashboard = () => {
   const { user, isFormateur, isEtudiant } = useAuth()
   
-  // Afficher le nom complet ou le username
   const displayName = user?.prenom 
     ? `${user.prenom} ${user.nom}` 
     : (user?.nom || user?.username)
 
+  const getInitials = () => {
+    if (user?.prenom && user?.nom) {
+      return `${user.prenom[0]}${user.nom[0]}`.toUpperCase()
+    }
+    return user?.username?.[0]?.toUpperCase() || 'U'
+  }
+
   return (
-    <div>
-      {/* Welcome Header */}
-      <div className="mb-4">
-        <h2>Bonjour, {displayName}!</h2>
-        <p className="text-muted">
-          Bienvenue sur votre espace personnel
-          <Badge bg="primary" className="ms-2">{user?.type}</Badge>
-        </p>
+    <div className="page-content">
+      {/* Welcome Banner */}
+      <div className="welcome-banner">
+        <h2>👋 Bonjour, {displayName}!</h2>
+        <p>Bienvenue sur votre espace personnel Institut IIT</p>
+        <span className="user-badge">
+          {isEtudiant() ? <FaGraduationCap /> : <FaChalkboardTeacher />}
+          {user?.type}
+        </span>
       </div>
 
-      <Row>
+      <div style={{display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem', alignItems: 'start'}}>
         {/* Profile Card */}
-        <Col md={4} className="mb-4">
-          <Card className="h-100">
-            <Card.Header className="bg-primary text-white">
-              <FaUser className="me-2" />
-              Mon Profil
-            </Card.Header>
-            <Card.Body>
-              <p><strong>Identifiant:</strong> {user?.username}</p>
-              {user?.prenom && <p><strong>Nom:</strong> {user?.nom}</p>}
-              {user?.prenom && <p><strong>Prénom:</strong> {user?.prenom}</p>}
-              <p><strong>Email:</strong> {user?.email}</p>
-              <p><strong>Rôle:</strong> {user?.type}</p>
-              {user?.specialite && (
-                <p><strong>Spécialité:</strong> {user?.specialite}</p>
-              )}
-              <Link to="/profile" className="btn btn-outline-primary btn-sm mt-2">
-                <FaCog className="me-1" /> Modifier mon profil
-              </Link>
-            </Card.Body>
-          </Card>
-        </Col>
+        <div className="profile-card-modern">
+          <div className="profile-header-section">
+            <div className="profile-avatar-large">{getInitials()}</div>
+            <h3>{displayName}</h3>
+            <span className="role-badge">
+              {isEtudiant() ? <FaGraduationCap /> : <FaChalkboardTeacher />}
+              {user?.type}
+            </span>
+          </div>
+          <div className="profile-body">
+            <div className="profile-info-item">
+              <div className="info-icon"><FaUser /></div>
+              <div>
+                <div className="info-label">Identifiant</div>
+                <div className="info-value">{user?.username}</div>
+              </div>
+            </div>
+            <div className="profile-info-item">
+              <div className="info-icon"><FaEnvelope /></div>
+              <div>
+                <div className="info-label">Email</div>
+                <div className="info-value">{user?.email}</div>
+              </div>
+            </div>
+            {user?.specialite && (
+              <div className="profile-info-item">
+                <div className="info-icon"><FaIdBadge /></div>
+                <div>
+                  <div className="info-label">Spécialité</div>
+                  <div className="info-value">{user?.specialite}</div>
+                </div>
+              </div>
+            )}
+            <Link to="/profile" className="btn-modern btn-modern-primary" style={{marginTop: '1rem'}}>
+              <FaCog /> Modifier mon profil
+            </Link>
+          </div>
+        </div>
 
         {/* Quick Actions */}
-        <Col md={8} className="mb-4">
-          <Card className="h-100">
-            <Card.Header className="bg-secondary text-white">
-              <FaClipboardList className="me-2" />
-              Accès rapide
-            </Card.Header>
-            <Card.Body>
-              <Row>
-                {/* Étudiant: Mes Cours, Mes Notes */}
-                {isEtudiant() && (
-                  <>
-                    <Col md={6} className="mb-3">
-                      <Card className="text-center h-100 border-primary">
-                        <Card.Body>
-                          <FaBook size={40} className="text-primary mb-3" />
-                          <h5>Mes Cours</h5>
-                          <p className="text-muted small">Consultez vos cours et inscriptions</p>
-                          <Link to="/mes-cours" className="btn btn-primary">
-                            Voir mes cours
-                          </Link>
-                        </Card.Body>
-                      </Card>
-                    </Col>
-                    <Col md={6} className="mb-3">
-                      <Card className="text-center h-100 border-success">
-                        <Card.Body>
-                          <FaGraduationCap size={40} className="text-success mb-3" />
-                          <h5>Mes Notes</h5>
-                          <p className="text-muted small">Consultez vos notes et résultats</p>
-                          <Link to="/mes-notes" className="btn btn-success">
-                            Voir mes notes
-                          </Link>
-                        </Card.Body>
-                      </Card>
-                    </Col>
-                  </>
-                )}
+        <div>
+          <h3 style={{fontSize: '1.25rem', fontWeight: '600', color: 'var(--gray-900)', marginBottom: '1.25rem'}}>
+            Accès rapide
+          </h3>
+          <div className="action-cards" style={{marginTop: 0}}>
+            {/* Étudiant Actions */}
+            {isEtudiant() && (
+              <>
+                <Link to="/mes-cours" className="action-card cyan" style={{textDecoration: 'none'}}>
+                  <div className="icon-box">
+                    <FaBook />
+                  </div>
+                  <h4>Mes Cours</h4>
+                  <p>Consultez vos cours et inscriptions</p>
+                  <span className="btn-action">
+                    Accéder <FaArrowRight />
+                  </span>
+                </Link>
+                <Link to="/mes-notes" className="action-card emerald" style={{textDecoration: 'none'}}>
+                  <div className="icon-box">
+                    <FaGraduationCap />
+                  </div>
+                  <h4>Mes Notes</h4>
+                  <p>Consultez vos notes et résultats</p>
+                  <span className="btn-action">
+                    Accéder <FaArrowRight />
+                  </span>
+                </Link>
+              </>
+            )}
 
-                {/* Formateur: Mes Cours, Notes à saisir */}
-                {isFormateur() && (
-                  <>
-                    <Col md={6} className="mb-3">
-                      <Card className="text-center h-100 border-primary">
-                        <Card.Body>
-                          <FaBook size={40} className="text-primary mb-3" />
-                          <h5>Mes Cours</h5>
-                          <p className="text-muted small">Consultez les cours que vous dispensez</p>
-                          <Link to="/mes-cours" className="btn btn-primary">
-                            Voir mes cours
-                          </Link>
-                        </Card.Body>
-                      </Card>
-                    </Col>
-                    <Col md={6} className="mb-3">
-                      <Card className="text-center h-100 border-warning">
-                        <Card.Body>
-                          <FaClipboardList size={40} className="text-warning mb-3" />
-                          <h5>Saisie des Notes</h5>
-                          <p className="text-muted small">Saisissez les notes de vos étudiants</p>
-                          <Link to="/saisie-notes" className="btn btn-warning">
-                            Saisir les notes
-                          </Link>
-                        </Card.Body>
-                      </Card>
-                    </Col>
-                  </>
-                )}
-              </Row>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+            {/* Formateur Actions */}
+            {isFormateur() && (
+              <>
+                <Link to="/mes-cours" className="action-card primary" style={{textDecoration: 'none'}}>
+                  <div className="icon-box">
+                    <FaBook />
+                  </div>
+                  <h4>Mes Cours</h4>
+                  <p>Consultez les cours que vous dispensez</p>
+                  <span className="btn-action">
+                    Accéder <FaArrowRight />
+                  </span>
+                </Link>
+                <Link to="/saisie-notes" className="action-card amber" style={{textDecoration: 'none'}}>
+                  <div className="icon-box">
+                    <FaClipboardList />
+                  </div>
+                  <h4>Saisie des Notes</h4>
+                  <p>Saisissez les notes de vos étudiants</p>
+                  <span className="btn-action">
+                    Accéder <FaArrowRight />
+                  </span>
+                </Link>
+              </>
+            )}
+          </div>
 
-      {/* Info Section */}
-      <Row>
-        <Col md={12}>
-          <Card>
-            <Card.Header>
-              <h5 className="mb-0">Informations</h5>
-            </Card.Header>
-            <Card.Body>
-              <ListGroup variant="flush">
-                <ListGroup.Item>
-                  <strong>Espace utilisateur :</strong> Cette application vous permet de gérer votre profil, 
-                  consulter vos cours et notes.
-                </ListGroup.Item>
-                {isEtudiant() && (
-                  <ListGroup.Item>
-                    <strong>Étudiant :</strong> Vous pouvez consulter vos inscriptions aux cours et voir vos notes.
-                  </ListGroup.Item>
-                )}
-                {isFormateur() && (
-                  <ListGroup.Item>
-                    <strong>Formateur :</strong> Vous pouvez consulter vos cours et saisir les notes des étudiants.
-                  </ListGroup.Item>
-                )}
-                <ListGroup.Item>
-                  <strong>Besoin d'aide ?</strong> Contactez l'administration du centre de formation.
-                </ListGroup.Item>
-              </ListGroup>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+          {/* Info Card */}
+          <div className="info-card">
+            <h5><FaInfoCircle /> Informations utiles</h5>
+            <ul>
+              <li>
+                <strong>Espace utilisateur :</strong> Cette application vous permet de gérer votre profil, 
+                consulter vos cours et notes.
+              </li>
+              {isEtudiant() && (
+                <li>
+                  <strong>Étudiant :</strong> Vous pouvez consulter vos inscriptions aux cours et voir vos notes.
+                </li>
+              )}
+              {isFormateur() && (
+                <li>
+                  <strong>Formateur :</strong> Vous pouvez consulter vos cours et saisir les notes des étudiants.
+                </li>
+              )}
+              <li>
+                <strong>Besoin d'aide ?</strong> Contactez l'administration du centre de formation.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

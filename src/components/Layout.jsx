@@ -1,11 +1,16 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { Container, Row, Col, Nav, Navbar, Dropdown } from 'react-bootstrap'
+import { Dropdown } from 'react-bootstrap'
 import { 
   FaHome, 
   FaBook, 
   FaGraduationCap,
   FaUser, 
-  FaSignOutAlt 
+  FaSignOutAlt,
+  FaCalendarAlt,
+  FaClipboardList,
+  FaPenAlt,
+  FaChevronDown,
+  FaChalkboardTeacher
 } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
 
@@ -18,72 +23,109 @@ const Layout = () => {
     navigate('/login')
   }
 
+  const displayName = user?.prenom 
+    ? `${user.prenom} ${user.nom}` 
+    : (user?.nom || user?.username)
+
+  const getInitials = () => {
+    if (user?.prenom && user?.nom) {
+      return `${user.prenom[0]}${user.nom[0]}`.toUpperCase()
+    }
+    return user?.username?.[0]?.toUpperCase() || 'U'
+  }
+
   return (
-    <Container fluid className="p-0">
-      <Row className="g-0">
-        {/* Sidebar */}
-        <Col md={2} className="sidebar d-none d-md-block">
-          <div className="p-4 text-center">
-            <h4 className="text-white fw-bold">Centre Formation</h4>
-            <small className="text-white-50">Espace Utilisateur</small>
-          </div>
+    <div style={{display: 'flex', minHeight: '100vh'}}>
+      {/* Sidebar */}
+      <aside className="modern-sidebar" style={{width: '260px', flexShrink: 0}}>
+        {/* Brand */}
+        <div className="sidebar-brand">
+          <div className="logo-wrapper">IIT</div>
+          <h5>Institut IIT</h5>
+          <small>Espace Utilisateur</small>
+        </div>
+        
+        {/* Navigation */}
+        <nav className="sidebar-nav">
+          <NavLink to="/dashboard" className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
+            <FaHome /> Tableau de bord
+          </NavLink>
           
-          <Nav className="flex-column mt-3">
-            <Nav.Link as={NavLink} to="/dashboard">
-              <FaHome /> Accueil
-            </Nav.Link>
-            
-            <Nav.Link as={NavLink} to="/mes-cours">
-              <FaBook /> Mes Cours
-            </Nav.Link>
-            
-            {isEtudiant() && (
-              <Nav.Link as={NavLink} to="/mes-notes">
-                <FaGraduationCap /> Mes Notes
-              </Nav.Link>
-            )}
-            
-            <Nav.Link as={NavLink} to="/profile">
-              <FaUser /> Mon Profil
-            </Nav.Link>
-          </Nav>
-        </Col>
+          <NavLink to="/mes-cours" className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
+            <FaBook /> Mes Cours
+          </NavLink>
+          
+          {isEtudiant() && (
+            <NavLink to="/mes-notes" className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
+              <FaGraduationCap /> Mes Notes
+            </NavLink>
+          )}
+          
+          <NavLink to="/emploi-du-temps" className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
+            <FaCalendarAlt /> Emploi du temps
+          </NavLink>
+          
+          <div className="nav-divider"></div>
+          
+          {isFormateur() && (
+            <NavLink to="/saisie-notes" className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
+              <FaPenAlt /> Saisie Notes
+            </NavLink>
+          )}
+          
+          <NavLink to="/profile" className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
+            <FaUser /> Mon Profil
+          </NavLink>
+        </nav>
+      </aside>
 
-        {/* Main Content */}
-        <Col md={10} className="main-content">
-          {/* Top Navbar */}
-          <Navbar className="px-4 py-3">
-            <Navbar.Brand className="d-md-none">Centre Formation</Navbar.Brand>
-            <Navbar.Toggle />
-            <Navbar.Collapse className="justify-content-end">
-              <Dropdown align="end">
-                <Dropdown.Toggle variant="light" className="user-dropdown">
-                  <FaUser className="me-2" />
-                  {user?.prenom ? `${user.prenom} ${user.nom}` : user?.username || user?.nom}
-                  <span className="badge bg-primary ms-2">
-                    {user?.type}
-                  </span>
-                </Dropdown.Toggle>
-                <Dropdown.Menu>
-                  <Dropdown.Item onClick={() => navigate('/profile')}>
-                    <FaUser className="me-2" /> Mon Profil
-                  </Dropdown.Item>
-                  <Dropdown.Divider />
-                  <Dropdown.Item onClick={handleLogout} className="text-danger">
-                    <FaSignOutAlt className="me-2" /> Déconnexion
-                  </Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-            </Navbar.Collapse>
-          </Navbar>
-
-          {/* Page Content */}
-          <div className="p-4">
-            <Outlet />
+      {/* Main Content */}
+      <main className="modern-main" style={{flex: 1, display: 'flex', flexDirection: 'column'}}>
+        {/* Top Navbar */}
+        <header className="modern-navbar">
+          <span className="navbar-title">
+            {isEtudiant() ? 'Espace Étudiant' : 'Espace Formateur'}
+          </span>
+          
+          <div className="navbar-user">
+            <Dropdown align="end" className="modern-dropdown">
+              <Dropdown.Toggle as="button" style={{
+                background: 'transparent',
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                padding: '0.5rem',
+                borderRadius: 'var(--radius-md)',
+                cursor: 'pointer'
+              }}>
+                <div className="user-info">
+                  <div className="name">{displayName}</div>
+                  <div className="role">{user?.type}</div>
+                </div>
+                <div className="user-avatar">{getInitials()}</div>
+                <FaChevronDown style={{color: 'var(--gray-400)', fontSize: '0.75rem'}} />
+              </Dropdown.Toggle>
+              
+              <Dropdown.Menu>
+                <Dropdown.Item onClick={() => navigate('/profile')}>
+                  <FaUser /> Mon Profil
+                </Dropdown.Item>
+                <Dropdown.Divider />
+                <Dropdown.Item onClick={handleLogout} className="text-danger">
+                  <FaSignOutAlt /> Déconnexion
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
           </div>
-        </Col>
-      </Row>
-    </Container>
+        </header>
+
+        {/* Page Content */}
+        <div style={{flex: 1, overflow: 'auto'}}>
+          <Outlet />
+        </div>
+      </main>
+    </div>
   )
 }
 

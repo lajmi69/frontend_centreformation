@@ -1,13 +1,11 @@
 import { useState } from 'react'
-import { Card, Form, Button, Row, Col, Alert, Spinner } from 'react-bootstrap'
-import { FaUser, FaKey } from 'react-icons/fa'
+import { FaUser, FaKey, FaEnvelope, FaIdCard, FaUserTag, FaSave, FaLock, FaGraduationCap, FaChalkboardTeacher } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
 import { toast } from 'react-toastify'
 
 const Profile = () => {
-  const { user, updateProfile, changePassword } = useAuth()
+  const { user, updateProfile, changePassword, isEtudiant } = useAuth()
   
-  // Vérifier si l'utilisateur a un profil étudiant/formateur lié
   const hasLinkedProfile = user?.prenom && user?.prenom !== ''
   
   const [profileData, setProfileData] = useState({
@@ -87,173 +85,237 @@ const Profile = () => {
     }
   }
 
+  const getInitials = () => {
+    if (user?.prenom && user?.nom) {
+      return `${user.prenom[0]}${user.nom[0]}`.toUpperCase()
+    }
+    return user?.username?.[0]?.toUpperCase() || 'U'
+  }
+
+  const displayName = user?.prenom 
+    ? `${user.prenom} ${user.nom}` 
+    : (user?.nom || user?.username)
+
   return (
-    <div>
-      <h2 className="mb-4">Mon Profil</h2>
+    <div className="page-content">
+      <div className="page-header">
+        <h1><FaUser style={{marginRight: '0.5rem', color: 'var(--primary-500)'}} /> Mon Profil</h1>
+        <p>Gérez vos informations personnelles et votre sécurité</p>
+      </div>
 
-      <Row>
-        {/* Profile Information */}
-        <Col md={6}>
-          <Card className="mb-4">
-            <Card.Header>
-              <FaUser className="me-2" />
-              Informations personnelles
-            </Card.Header>
-            <Card.Body>
-              {profileError && <Alert variant="danger">{profileError}</Alert>}
-              
-              <Form onSubmit={handleProfileSubmit}>
-                {/* Afficher nom/prénom en lecture seule si lié à Etudiant/Formateur */}
-                {hasLinkedProfile && (
-                  <Row>
-                    <Col md={6}>
-                      <Form.Group className="mb-3">
-                        <Form.Label>Prénom</Form.Label>
-                        <Form.Control
-                          type="text"
-                          value={user?.prenom || ''}
-                          disabled
-                          className="bg-light"
-                        />
-                        <Form.Text className="text-muted">
-                          Modifiable par l'administration
-                        </Form.Text>
-                      </Form.Group>
-                    </Col>
-                    <Col md={6}>
-                      <Form.Group className="mb-3">
-                        <Form.Label>Nom</Form.Label>
-                        <Form.Control
-                          type="text"
-                          value={user?.nom || ''}
-                          disabled
-                          className="bg-light"
-                        />
-                        <Form.Text className="text-muted">
-                          Modifiable par l'administration
-                        </Form.Text>
-                      </Form.Group>
-                    </Col>
-                  </Row>
-                )}
+      {/* Profile Header Card */}
+      <div className="profile-card-modern" style={{marginBottom: '1.5rem'}}>
+        <div className="profile-header-section">
+          <div className="profile-avatar-large">{getInitials()}</div>
+          <h3>{displayName}</h3>
+          <span className="role-badge">
+            {isEtudiant() ? <FaGraduationCap /> : <FaChalkboardTeacher />}
+            {user?.type}
+          </span>
+        </div>
+      </div>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>Identifiant</Form.Label>
-                  <Form.Control
+      <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem'}}>
+        {/* Profile Information Form */}
+        <div className="modern-table-card">
+          <div className="card-header">
+            <h3><FaUser /> Informations personnelles</h3>
+          </div>
+          <div className="card-body" style={{padding: '1.5rem'}}>
+            {profileError && (
+              <div className="alert-modern error" style={{marginBottom: '1rem'}}>
+                <span>⚠️</span> {profileError}
+              </div>
+            )}
+            
+            <form onSubmit={handleProfileSubmit}>
+              {hasLinkedProfile && (
+                <div className="form-row" style={{marginBottom: '1rem'}}>
+                  <div className="modern-input-group">
+                    <label>Prénom</label>
+                    <div className="modern-input-wrapper">
+                      <input
+                        type="text"
+                        className="modern-input"
+                        value={user?.prenom || ''}
+                        disabled
+                        style={{background: 'var(--gray-100)', cursor: 'not-allowed'}}
+                      />
+                      <FaUser className="input-icon" />
+                    </div>
+                    <small style={{color: 'var(--gray-500)', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block'}}>
+                      Modifiable par l'administration
+                    </small>
+                  </div>
+                  <div className="modern-input-group">
+                    <label>Nom</label>
+                    <div className="modern-input-wrapper">
+                      <input
+                        type="text"
+                        className="modern-input"
+                        value={user?.nom || ''}
+                        disabled
+                        style={{background: 'var(--gray-100)', cursor: 'not-allowed'}}
+                      />
+                      <FaUser className="input-icon" />
+                    </div>
+                    <small style={{color: 'var(--gray-500)', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block'}}>
+                      Modifiable par l'administration
+                    </small>
+                  </div>
+                </div>
+              )}
+
+              <div className="modern-input-group">
+                <label>Identifiant</label>
+                <div className="modern-input-wrapper">
+                  <input
                     type="text"
+                    className="modern-input"
                     value={user?.username || ''}
                     disabled
-                    className="bg-light"
+                    style={{background: 'var(--gray-100)', cursor: 'not-allowed'}}
                   />
-                </Form.Group>
+                  <FaIdCard className="input-icon" />
+                </div>
+              </div>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>Email</Form.Label>
-                  <Form.Control
+              <div className="modern-input-group">
+                <label>Email</label>
+                <div className="modern-input-wrapper">
+                  <input
                     type="email"
+                    className="modern-input"
                     name="email"
                     value={profileData.email}
                     onChange={handleProfileChange}
                     required
                   />
-                </Form.Group>
+                  <FaEnvelope className="input-icon" />
+                </div>
+              </div>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>Rôle</Form.Label>
-                  <Form.Control
+              <div className="modern-input-group">
+                <label>Rôle</label>
+                <div className="modern-input-wrapper">
+                  <input
                     type="text"
+                    className="modern-input"
                     value={user?.type || ''}
                     disabled
-                    className="bg-light"
+                    style={{background: 'var(--gray-100)', cursor: 'not-allowed'}}
                   />
-                </Form.Group>
+                  <FaUserTag className="input-icon" />
+                </div>
+              </div>
 
-                <Button 
-                  type="submit" 
-                  variant="primary"
-                  disabled={profileLoading}
-                >
-                  {profileLoading ? (
-                    <>
-                      <Spinner animation="border" size="sm" className="me-2" />
-                      Enregistrement...
-                    </>
-                  ) : (
-                    'Enregistrer les modifications'
-                  )}
-                </Button>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col>
+              <button 
+                type="submit" 
+                className="btn-modern btn-modern-primary"
+                disabled={profileLoading}
+                style={{marginTop: '0.5rem'}}
+              >
+                {profileLoading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm"></span>
+                    Enregistrement...
+                  </>
+                ) : (
+                  <>
+                    <FaSave /> Enregistrer les modifications
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
 
-        {/* Change Password */}
-        <Col md={6}>
-          <Card>
-            <Card.Header>
-              <FaKey className="me-2" />
-              Changer le mot de passe
-            </Card.Header>
-            <Card.Body>
-              {passwordError && <Alert variant="danger">{passwordError}</Alert>}
-              
-              <Form onSubmit={handlePasswordSubmit}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Mot de passe actuel</Form.Label>
-                  <Form.Control
+        {/* Change Password Form */}
+        <div className="modern-table-card">
+          <div className="card-header">
+            <h3><FaKey /> Changer le mot de passe</h3>
+          </div>
+          <div className="card-body" style={{padding: '1.5rem'}}>
+            {passwordError && (
+              <div className="alert-modern error" style={{marginBottom: '1rem'}}>
+                <span>⚠️</span> {passwordError}
+              </div>
+            )}
+            
+            <form onSubmit={handlePasswordSubmit}>
+              <div className="modern-input-group">
+                <label>Mot de passe actuel</label>
+                <div className="modern-input-wrapper">
+                  <input
                     type="password"
+                    className="modern-input"
                     name="oldPassword"
                     value={passwordData.oldPassword}
                     onChange={handlePasswordChange}
                     required
+                    placeholder="Entrez votre mot de passe actuel"
                   />
-                </Form.Group>
+                  <FaLock className="input-icon" />
+                </div>
+              </div>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>Nouveau mot de passe</Form.Label>
-                  <Form.Control
+              <div className="modern-input-group">
+                <label>Nouveau mot de passe</label>
+                <div className="modern-input-wrapper">
+                  <input
                     type="password"
+                    className="modern-input"
                     name="newPassword"
                     value={passwordData.newPassword}
                     onChange={handlePasswordChange}
                     required
                     minLength={6}
+                    placeholder="Minimum 6 caractères"
                   />
-                  <Form.Text className="text-muted">
-                    Minimum 6 caractères
-                  </Form.Text>
-                </Form.Group>
+                  <FaLock className="input-icon" />
+                </div>
+                <small style={{color: 'var(--gray-500)', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block'}}>
+                  Minimum 6 caractères
+                </small>
+              </div>
 
-                <Form.Group className="mb-3">
-                  <Form.Label>Confirmer le nouveau mot de passe</Form.Label>
-                  <Form.Control
+              <div className="modern-input-group">
+                <label>Confirmer le nouveau mot de passe</label>
+                <div className="modern-input-wrapper">
+                  <input
                     type="password"
+                    className="modern-input"
                     name="confirmPassword"
                     value={passwordData.confirmPassword}
                     onChange={handlePasswordChange}
                     required
+                    placeholder="Confirmez le nouveau mot de passe"
                   />
-                </Form.Group>
+                  <FaLock className="input-icon" />
+                </div>
+              </div>
 
-                <Button 
-                  type="submit" 
-                  variant="warning"
-                  disabled={passwordLoading}
-                >
-                  {passwordLoading ? (
-                    <>
-                      <Spinner animation="border" size="sm" className="me-2" />
-                      Modification...
-                    </>
-                  ) : (
-                    'Changer le mot de passe'
-                  )}
-                </Button>
-              </Form>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+              <button 
+                type="submit" 
+                className="btn-modern btn-modern-primary"
+                disabled={passwordLoading}
+                style={{marginTop: '0.5rem', background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', boxShadow: '0 4px 15px rgba(245, 158, 11, 0.4)'}}
+              >
+                {passwordLoading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm"></span>
+                    Modification...
+                  </>
+                ) : (
+                  <>
+                    <FaKey /> Changer le mot de passe
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

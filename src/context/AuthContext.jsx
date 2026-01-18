@@ -69,12 +69,16 @@ export const AuthProvider = ({ children }) => {
   }
 
   const hasRole = (role) => {
-    return user?.roles?.includes(role)
+    if (!user?.roles) return false
+    // Accepter les deux formats: ROLE_XXX ou XXX
+    const roleWithPrefix = role.startsWith('ROLE_') ? role : `ROLE_${role}`
+    const roleWithoutPrefix = role.startsWith('ROLE_') ? role.substring(5) : role
+    return user.roles.includes(roleWithPrefix) || user.roles.includes(roleWithoutPrefix)
   }
 
-  const isAdmin = () => hasRole('ROLE_ADMIN')
-  const isFormateur = () => hasRole('ROLE_FORMATEUR')
-  const isEtudiant = () => hasRole('ROLE_ETUDIANT')
+  const isAdmin = () => hasRole('ADMIN')
+  const isFormateur = () => hasRole('FORMATEUR')
+  const isEtudiant = () => hasRole('ETUDIANT')
 
   const value = {
     user,

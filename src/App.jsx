@@ -12,11 +12,14 @@ import Dashboard from './pages/Dashboard'
 import Profile from './pages/Profile'
 import MesCours from './pages/MesCours'
 import MesNotes from './pages/MesNotes'
+import EmploiDuTemps from './pages/EmploiDuTemps'
+import CoursDisponibles from './pages/CoursDisponibles'
+import SaisieNotes from './pages/SaisieNotes'
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ToastContainer position="top-right" autoClose={3000} />
         <Routes>
           {/* Routes publiques */}
@@ -30,6 +33,9 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/mes-cours" element={<MesCours />} />
               <Route path="/mes-notes" element={<MesNotes />} />
+              <Route path="/emploi-du-temps" element={<EmploiDuTemps />} />
+              <Route path="/cours-disponibles" element={<CoursDisponibles />} />
+              <Route path="/saisie-notes" element={<SaisieNotes />} />
             </Route>
           </Route>
           
