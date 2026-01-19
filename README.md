@@ -108,9 +108,4 @@ Le proxy Vite est configuré pour rediriger les appels `/api/*` vers le backend 
 | `/api/notes` | CRUD | Gestion des notes |
 | `/api/statistiques/*` | GET | Statistiques |
 
-## Sécurité
 
-- JWT Token stocké dans localStorage
-- Intercepteur Axios pour ajouter le token à chaque requête
-- Redirection automatique vers /login si token expiré (401)
-- Routes protégées via PrivateRoute
